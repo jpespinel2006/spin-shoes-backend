@@ -12,7 +12,7 @@ import clientsRoutes from "./routes/clients.routes.js";
 import catalogRoutes from "./routes/catalog.routes.js";
 import productionRoutes from "./routes/production.routes.js";
 import reportsRoutes from "./routes/reports.routes.js";
-import adminRoutes from "./routes/admin.routes.js";
+import adminRoutes from "./routes/Admin.routes.js";
 
 dotenv.config();
 
