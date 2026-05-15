@@ -3,15 +3,9 @@ dotenv.config();
 import pkg from "pg";
 const { Pool } = pkg;
 
-export const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: { rejectUnauthorized: false },
-});
+const connectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?options=--search_path%3Dpublic`;
 
-pool.on("connect", (client) => {
-  client.query("SET search_path TO public");
+export const pool = new Pool({
+  connectionString,
+  ssl: { rejectUnauthorized: false },
 });
