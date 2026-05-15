@@ -1,12 +1,4 @@
 import { pool } from "../db.js";
-import axios from "axios";
-
-// Llama al reindex de Python en segundo plano (sin bloquear la respuesta)
-const reindexarIA = () => {
-  axios.post("http://127.0.0.1:8000/admin/reindex")
-    .then(r => console.log("✅ IA reindexada:", r.data.documentos_indexados, "docs"))
-    .catch(e => console.warn("⚠️ No se pudo reindexar IA:", e.message));
-};
 
 // Obtener todo el catálogo
 export const getCatalog = async (req, res) => {
@@ -29,7 +21,6 @@ export const createProduct = async (req, res) => {
       [referencia, descripcion, precio, imagen_url || null]
     );
     res.json({ message: "Producto creado", product: result.rows[0] });
-    reindexarIA();
   } catch (error) {
     console.error("❌ Error al crear producto:", error);
     if (error.code === "23505") {
@@ -50,7 +41,6 @@ export const updateProduct = async (req, res) => {
       [referencia, descripcion, precio, imagen_url, id]
     );
     res.json({ message: "Producto actualizado" });
-    reindexarIA();
   } catch (error) {
     console.error("❌ Error al actualizar producto:", error);
     res.status(500).json({ message: "Error al actualizar producto" });
@@ -63,7 +53,6 @@ export const deleteProduct = async (req, res) => {
   try {
     await pool.query("DELETE FROM public.catalog WHERE id = $1", [id]);
     res.json({ message: "Producto eliminado" });
-    reindexarIA();
   } catch (error) {
     console.error("❌ Error al eliminar producto:", error);
     res.status(500).json({ message: "Error al eliminar producto" });
@@ -79,7 +68,7 @@ export const uploadImagenColor = async (req, res) => {
     return res.status(400).json({ message: "No se recibió ninguna imagen" });
   }
 
-  const imageUrl = `http://localhost:4000/uploads/${req.file.filename}`;
+  const imageUrl = `https://spin-shoes-backend.onrender.com/uploads/${req.file.filename}`;
 
   try {
     const result = await pool.query("SELECT imagen_url FROM public.catalog WHERE id = $1", [id]);
