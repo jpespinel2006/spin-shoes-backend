@@ -10,5 +10,8 @@ export const pool = new Pool({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
   ssl: { rejectUnauthorized: false },
-  options: "-c search_path=public",
+});
+
+pool.on("connect", (client) => {
+  client.query("SET search_path TO public");
 });
