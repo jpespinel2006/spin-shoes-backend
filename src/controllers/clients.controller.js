@@ -10,7 +10,7 @@ const reindexarIA = () => {
 // Obtener todos los clientes
 export const getClients = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM clients ORDER BY id DESC");
+    const result = await pool.query("SELECT * FROM public.clients ORDER BY id DESC");
     res.json(result.rows);
   } catch (error) {
     console.error("❌ Error al obtener clientes:", error);
@@ -23,7 +23,7 @@ export const createClient = async (req, res) => {
   const { nombre, nit, telefono, email, ciudad, direccion, tipo_cliente } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO clients (nombre, nit, telefono, email, ciudad, direccion, tipo_cliente)
+      `INSERT INTO public.clients (nombre, nit, telefono, email, ciudad, direccion, tipo_cliente)
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
       [nombre, nit, telefono, email, ciudad, direccion, tipo_cliente || "NATURAL"]
     );
@@ -44,7 +44,7 @@ export const updateClient = async (req, res) => {
   const { nombre, nit, telefono, email, ciudad, direccion, tipo_cliente } = req.body;
   try {
     await pool.query(
-      `UPDATE clients SET nombre=$1, nit=$2, telefono=$3, email=$4,
+      `UPDATE public.clients SET nombre=$1, nit=$2, telefono=$3, email=$4,
        ciudad=$5, direccion=$6, tipo_cliente=$7 WHERE id=$8`,
       [nombre, nit, telefono, email, ciudad, direccion, tipo_cliente, id]
     );
@@ -60,7 +60,7 @@ export const updateClient = async (req, res) => {
 export const deleteClient = async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM clients WHERE id = $1", [id]);
+    await pool.query("DELETE FROM public.clients WHERE id = $1", [id]);
     res.json({ message: "Cliente eliminado" });
     reindexarIA();
   } catch (error) {

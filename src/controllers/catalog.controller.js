@@ -11,7 +11,7 @@ const reindexarIA = () => {
 // Obtener todo el catálogo
 export const getCatalog = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM catalog ORDER BY referencia ASC");
+    const result = await pool.query("SELECT * FROM public.catalog ORDER BY referencia ASC");
     res.json(result.rows);
   } catch (error) {
     console.error("❌ Error al obtener catálogo:", error);
@@ -24,7 +24,7 @@ export const createProduct = async (req, res) => {
   const { referencia, descripcion, precio, imagen_url } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO catalog (referencia, descripcion, precio, imagen_url)
+      `INSERT INTO public.catalog (referencia, descripcion, precio, imagen_url)
        VALUES ($1,$2,$3,$4) RETURNING *`,
       [referencia, descripcion, precio, imagen_url || null]
     );
@@ -45,7 +45,7 @@ export const updateProduct = async (req, res) => {
   const { referencia, descripcion, precio, imagen_url } = req.body;
   try {
     await pool.query(
-      `UPDATE catalog SET referencia=$1, descripcion=$2, precio=$3, imagen_url=$4
+      `UPDATE public.catalog SET referencia=$1, descripcion=$2, precio=$3, imagen_url=$4
        WHERE id=$5`,
       [referencia, descripcion, precio, imagen_url, id]
     );
@@ -61,7 +61,7 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM catalog WHERE id = $1", [id]);
+    await pool.query("DELETE FROM public.catalog WHERE id = $1", [id]);
     res.json({ message: "Producto eliminado" });
     reindexarIA();
   } catch (error) {
@@ -82,7 +82,7 @@ export const uploadImagenColor = async (req, res) => {
   const imageUrl = `http://localhost:4000/uploads/${req.file.filename}`;
 
   try {
-    const result = await pool.query("SELECT imagen_url FROM catalog WHERE id = $1", [id]);
+    const result = await pool.query("SELECT imagen_url FROM public.catalog WHERE id = $1", [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
@@ -96,7 +96,7 @@ export const uploadImagenColor = async (req, res) => {
     imagenes[color] = imageUrl;
 
     await pool.query(
-      "UPDATE catalog SET imagen_url = $1 WHERE id = $2",
+      "UPDATE public.catalog SET imagen_url = $1 WHERE id = $2",
       [JSON.stringify(imagenes), id]
     );
 

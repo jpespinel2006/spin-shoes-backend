@@ -4,12 +4,12 @@ import axios from "axios";
 export const getDashboard = async (req, res) => {
   try {
     // 🔢 pedidos recientes
-    const pedidos = await pool.query("SELECT * FROM orders ORDER BY id DESC LIMIT 5");
+    const pedidos = await pool.query("SELECT * FROM public.orders ORDER BY id DESC LIMIT 5");
 
     // 📊 conteo estados
-    const activos = await pool.query("SELECT COUNT(*) FROM orders WHERE status='activo'");
-    const produccion = await pool.query("SELECT COUNT(*) FROM orders WHERE status='produccion'");
-    const completados = await pool.query("SELECT COUNT(*) FROM orders WHERE status='completado'");
+    const activos = await pool.query("SELECT COUNT(*) FROM public.orders WHERE status='activo'");
+    const produccion = await pool.query("SELECT COUNT(*) FROM public.orders WHERE status='produccion'");
+    const completados = await pool.query("SELECT COUNT(*) FROM public.orders WHERE status='completado'");
 
     // 🤖 traer grafica desde Python
 const py = await axios.get("http://127.0.0.1:8000/analytics");
@@ -17,7 +17,7 @@ const py = await axios.get("http://127.0.0.1:8000/analytics");
     let alerts = [];
 
     // 🚨 pedidos grandes
-    const grandes = await pool.query("SELECT * FROM orders WHERE cantidad > 50");
+    const grandes = await pool.query("SELECT * FROM public.orders WHERE cantidad > 50");
     if (grandes.rows.length > 0) {
       alerts.push({
         tipo: "warning",

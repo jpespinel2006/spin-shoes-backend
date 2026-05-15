@@ -10,7 +10,7 @@ const reindexarIA = () => {
 // Obtener pedidos
 export const getOrders = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM orders ORDER BY id DESC");
+    const result = await pool.query("SELECT * FROM public.orders ORDER BY id DESC");
     res.json(result.rows);
   } catch (error) {
     console.error(error);
@@ -23,7 +23,7 @@ export const createOrder = async (req, res) => {
   const { cliente, modelo, cantidad, status, personalizacion } = req.body;
   try {
     await pool.query(
-      `INSERT INTO orders (cliente, modelo, cantidad, status, personalizacion)
+      `INSERT INTO public.orders (cliente, modelo, cantidad, status, personalizacion)
        VALUES ($1,$2,$3,$4,$5)`,
       [cliente, modelo, cantidad, status, personalizacion]
     );
@@ -39,7 +39,7 @@ export const createOrder = async (req, res) => {
 export const deleteOrder = async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.query("DELETE FROM orders WHERE id = $1", [id]);
+    await pool.query("DELETE FROM public.orders WHERE id = $1", [id]);
     res.json({ message: "Pedido eliminado" });
     reindexarIA();
   } catch (error) {
@@ -54,7 +54,7 @@ export const updateOrder = async (req, res) => {
   const { cliente, modelo, cantidad, status, personalizacion } = req.body;
   try {
     await pool.query(
-      `UPDATE orders 
+      `UPDATE public.orders 
        SET cliente=$1, modelo=$2, cantidad=$3, status=$4, personalizacion=$5
        WHERE id=$6`,
       [cliente, modelo, cantidad, status, personalizacion, id]

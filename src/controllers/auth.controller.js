@@ -10,7 +10,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      `INSERT INTO users (nombre, empresa, telefono, email, ciudad, direccion, password)
+      `INSERT INTO public.users (nombre, empresa, telefono, email, ciudad, direccion, password)
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
       [nombre, empresa, telefono, email, ciudad, direccion, hashedPassword]
     );
@@ -38,7 +38,7 @@ export const login = async (req, res) => {
   try {
     // 🔍 Buscar usuario en la BD
     const result = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
+      "SELECT * FROM public.users WHERE email = $1",
       [email]
     );
 

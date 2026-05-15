@@ -5,7 +5,7 @@ export const getProduction = async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT p.*, o.cliente, o.modelo, o.cantidad
-      FROM production p
+      FROM public.production p
       JOIN orders o ON p.order_id = o.id
       ORDER BY p.id DESC
     `);
@@ -21,14 +21,14 @@ export const createProduction = async (req, res) => {
   const { order_id, responsable, fecha_estimada, notas } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO production (order_id, estado, responsable, fecha_estimada, notas)
+      `INSERT INTO public.production (order_id, estado, responsable, fecha_estimada, notas)
        VALUES ($1, 'CREADO', $2, $3, $4) RETURNING *`,
       [order_id, responsable, fecha_estimada || null, notas || null]
     );
 
     // Actualizar estado del pedido a "produccion"
     await pool.query(
-      "UPDATE orders SET status='produccion' WHERE id=$1",
+      "UPDATE public.orders SET status='produccion' WHERE id=$1",
       [order_id]
     );
 
@@ -53,14 +53,14 @@ export const updateProductionStatus = async (req, res) => {
   try {
     // Actualizar producción
     const result = await pool.query(
-      "UPDATE production SET estado=$1, notas=$2 WHERE id=$3 RETURNING order_id",
+      "UPDATE public.production SET estado=$1, notas=$2 WHERE id=$3 RETURNING order_id",
       [estado, notas, id]
     );
 
     // Si está entregado, actualizar el pedido a "completado"
     if (estado === "ENTREGADO" && result.rows[0]) {
       await pool.query(
-        "UPDATE orders SET status='completado' WHERE id=$1",
+        "UPDATE public.orders SET status='completado' WHERE id=$1",
         [result.rows[0].order_id]
       );
     }
