@@ -4,9 +4,9 @@ const PYTHON_URL = "https://spin-shoes-python-production.up.railway.app";
 
 export const askAI = async (req, res) => {
   try {
-    const { mensaje } = req.body;
+    const { message } = req.body;
     const response = await axios.post(`${PYTHON_URL}/chat`, {
-      pregunta: mensaje,
+      pregunta: message,
     });
     res.json({ respuesta: response.data.respuesta });
   } catch (error) {
