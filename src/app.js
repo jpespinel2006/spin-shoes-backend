@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-
 import authRoutes from "./routes/auth.routes.js";
 import ordersRoutes from "./routes/orders.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
@@ -24,10 +23,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Servir imágenes subidas como archivos estáticos
+// Servir imágenes subidas
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
-// Rutas
+// Servir frontend compilado
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+// Rutas API
 app.use("/api/auth",       authRoutes);
 app.use("/api/orders",     ordersRoutes);
 app.use("/api/dashboard",  dashboardRoutes);
@@ -36,7 +38,12 @@ app.use("/api/clients",    clientsRoutes);
 app.use("/api/catalog",    catalogRoutes);
 app.use("/api/production", productionRoutes);
 app.use("/api/reports",    reportsRoutes);
-app.use("/api/admin",     adminRoutes);
+app.use("/api/admin",      adminRoutes);
+
+// Cualquier otra ruta devuelve el frontend
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
 
 app.listen(process.env.PORT || 4000, () => {
   console.log("Servidor corriendo en puerto 4000");
