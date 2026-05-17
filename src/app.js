@@ -41,7 +41,7 @@ app.use("/api/reports",    reportsRoutes);
 app.use("/api/admin",      adminRoutes);
 
 // Cualquier otra ruta devuelve el frontend
-app.get("*", (req, res) => {
+app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
