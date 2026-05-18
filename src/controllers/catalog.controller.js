@@ -72,6 +72,7 @@ export const uploadImagenColor = async (req, res) => {
   const { id } = req.params;
   const color = (req.query.color || "default").toLowerCase().trim();
 
+  console.log("☁️ Subiendo a Cloudinary...", process.env.CLOUDINARY_CLOUD_NAME);
   console.log("📸 uploadImagenColor - id:", id, "color:", color);
   console.log("📸 file:", req.file ? req.file.originalname : "NO FILE");
   console.log("📸 CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
@@ -113,7 +114,7 @@ export const uploadImagenColor = async (req, res) => {
 
     res.json({ message: `Imagen del color "${color}" guardada`, url: imageUrl, imagenes });
   } catch (error) {
-    console.error("❌ Error al subir imagen:", error);
+    console.error("❌ Error al subir imagen:", error.message, error.stack);
     res.status(500).json({ message: "Error al guardar imagen" });
   }
 };
