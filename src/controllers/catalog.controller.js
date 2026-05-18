@@ -1,4 +1,12 @@
 import { pool } from "../db.js";
+import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Obtener todo el catálogo
 export const getCatalog = async (req, res) => {
@@ -68,9 +76,20 @@ export const uploadImagenColor = async (req, res) => {
     return res.status(400).json({ message: "No se recibió ninguna imagen" });
   }
 
-  const imageUrl = `https://spin-shoes-backend.onrender.com/uploads/${req.file.filename}`;
-
   try {
+    // Subir imagen a Cloudinary desde buffer
+    const imageUrl = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "spin-shoes", resource_type: "image" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result.secure_url);
+        }
+      );
+      Readable.from(req.file.buffer).pipe(stream);
+    });
+
+    // Obtener imagen_url actual
     const result = await pool.query("SELECT imagen_url FROM public.catalog WHERE id = $1", [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Producto no encontrado" });
