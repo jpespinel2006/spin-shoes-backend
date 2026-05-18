@@ -72,6 +72,9 @@ export const uploadImagenColor = async (req, res) => {
   const { id } = req.params;
   const color = (req.query.color || "default").toLowerCase().trim();
 
+  console.log("📸 uploadImagenColor - id:", id, "color:", color);
+  console.log("📸 file:", req.file ? req.file.originalname : "NO FILE");
+  console.log("📸 CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
   if (!req.file) {
     return res.status(400).json({ message: "No se recibió ninguna imagen" });
   }
