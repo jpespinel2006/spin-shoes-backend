@@ -1,6 +1,5 @@
 import { pool } from "../db.js";
 
-// Obtener pedidos
 export const getOrders = async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM public.orders ORDER BY id DESC");
@@ -11,14 +10,13 @@ export const getOrders = async (req, res) => {
   }
 };
 
-// Crear pedido
 export const createOrder = async (req, res) => {
-  const { cliente, modelo, cantidad, status, personalizacion, pago_estado, pago_monto } = req.body;
+  const { cliente, modelo, cantidad, status, personalizacion, pago_estado, pago_monto, precio_total } = req.body;
   try {
     await pool.query(
-      `INSERT INTO public.orders (cliente, modelo, cantidad, status, personalizacion, pago_estado, pago_monto)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [cliente, modelo, cantidad, status, personalizacion, pago_estado || "pendiente", pago_monto || 0]
+      `INSERT INTO public.orders (cliente, modelo, cantidad, status, personalizacion, pago_estado, pago_monto, precio_total)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [cliente, modelo, cantidad, status, personalizacion, pago_estado || "pendiente", pago_monto || 0, precio_total || 0]
     );
     res.json({ message: "Pedido creado" });
   } catch (error) {
@@ -27,7 +25,6 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// Eliminar pedido
 export const deleteOrder = async (req, res) => {
   const { id } = req.params;
   try {
@@ -39,16 +36,15 @@ export const deleteOrder = async (req, res) => {
   }
 };
 
-// Actualizar pedido
 export const updateOrder = async (req, res) => {
   const { id } = req.params;
-  const { cliente, modelo, cantidad, status, personalizacion, pago_estado, pago_monto } = req.body;
+  const { cliente, modelo, cantidad, status, personalizacion, pago_estado, pago_monto, precio_total } = req.body;
   try {
     await pool.query(
       `UPDATE public.orders 
-       SET cliente=$1, modelo=$2, cantidad=$3, status=$4, personalizacion=$5, pago_estado=$6, pago_monto=$7
-       WHERE id=$8`,
-      [cliente, modelo, cantidad, status, personalizacion, pago_estado || "pendiente", pago_monto || 0, id]
+       SET cliente=$1, modelo=$2, cantidad=$3, status=$4, personalizacion=$5, pago_estado=$6, pago_monto=$7, precio_total=$8
+       WHERE id=$9`,
+      [cliente, modelo, cantidad, status, personalizacion, pago_estado || "pendiente", pago_monto || 0, precio_total || 0, id]
     );
     res.json({ message: "Pedido actualizado" });
   } catch (error) {
