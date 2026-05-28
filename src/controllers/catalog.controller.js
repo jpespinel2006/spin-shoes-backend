@@ -8,7 +8,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Obtener todo el catálogo
 export const getCatalog = async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM public.catalog ORDER BY referencia ASC");
@@ -19,14 +18,13 @@ export const getCatalog = async (req, res) => {
   }
 };
 
-// Crear referencia
 export const createProduct = async (req, res) => {
-  const { referencia, descripcion, precio, imagen_url } = req.body;
+  const { referencia, descripcion, precio, imagen_url, color_meta } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO public.catalog (referencia, descripcion, precio, imagen_url)
-       VALUES ($1,$2,$3,$4) RETURNING *`,
-      [referencia, descripcion, precio, imagen_url || null]
+      `INSERT INTO public.catalog (referencia, descripcion, precio, imagen_url, color_meta)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [referencia, descripcion, precio, imagen_url || null, color_meta || null]
     );
     res.json({ message: "Producto creado", product: result.rows[0] });
   } catch (error) {
@@ -38,15 +36,14 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// Actualizar referencia
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { referencia, descripcion, precio, imagen_url } = req.body;
+  const { referencia, descripcion, precio, imagen_url, color_meta } = req.body;
   try {
     await pool.query(
-      `UPDATE public.catalog SET referencia=$1, descripcion=$2, precio=$3, imagen_url=$4
-       WHERE id=$5`,
-      [referencia, descripcion, precio, imagen_url, id]
+      `UPDATE public.catalog SET referencia=$1, descripcion=$2, precio=$3, imagen_url=$4, color_meta=$5
+       WHERE id=$6`,
+      [referencia, descripcion, precio, imagen_url, color_meta || null, id]
     );
     res.json({ message: "Producto actualizado" });
   } catch (error) {
@@ -55,7 +52,6 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-// Eliminar referencia
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
@@ -67,21 +63,15 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-// Subir imagen por color para una referencia
 export const uploadImagenColor = async (req, res) => {
   const { id } = req.params;
   const color = (req.query.color || "default").toLowerCase().trim();
 
-  console.log("☁️ Subiendo a Cloudinary...", process.env.CLOUDINARY_CLOUD_NAME);
-  console.log("📸 uploadImagenColor - id:", id, "color:", color);
-  console.log("📸 file:", req.file ? req.file.originalname : "NO FILE");
-  console.log("📸 CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
   if (!req.file) {
     return res.status(400).json({ message: "No se recibió ninguna imagen" });
   }
 
   try {
-    // Subir imagen a Cloudinary desde buffer
     const imageUrl = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "spin-shoes", resource_type: "image" },
@@ -93,7 +83,6 @@ export const uploadImagenColor = async (req, res) => {
       Readable.from(req.file.buffer).pipe(stream);
     });
 
-    // Obtener imagen_url actual
     const result = await pool.query("SELECT imagen_url FROM public.catalog WHERE id = $1", [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Producto no encontrado" });
@@ -114,7 +103,7 @@ export const uploadImagenColor = async (req, res) => {
 
     res.json({ message: `Imagen del color "${color}" guardada`, url: imageUrl, imagenes });
   } catch (error) {
-    console.error("❌ Error al subir imagen:", error.message, error.stack);
+    console.error("❌ Error al subir imagen:", error);
     res.status(500).json({ message: "Error al guardar imagen" });
   }
 };
